@@ -60,6 +60,7 @@ export interface PacienteResumo {
   celular?:          string;
   plano_saude?:      string;
   numero_prontuario?: string;
+  fotoUrl?:           string;
 }
 
 export const getPacientesPorMedico = async (

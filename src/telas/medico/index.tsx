@@ -11,60 +11,66 @@ function Medico() {
     if (nome) setNomeMedico(nome);
   }, []);
 
-  return (
-    <div className="bg-[url('/image.png')] bg-cover bg-center bg-no-repeat bg-fixed  from-[#5C8354] to-[#cbffc0]  h-screen w-screen items-center flex flex-col">
-     <BarraLateral/>
-      <div className="flex justify-center pt-10 w-full">
-        <div className="flex justify-start items-center pl-2  w-[70%] h-14 border rounded-md bg-white border-gray-400">
-          <div className="w-20 h-20  overflow-hidden rounded-full   shadow-md">
-            <img
-              src="/medico.png"
-              alt="Foto do Médico"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="pl-2 text-lg font-semibold">Dr.
-            {nomeMedico ? nomeMedico : "Médico"}
-          </div>
-        </div>
+   return (
+    <div className="flex min-h-screen bg-gradient-to-br from-[#386e1e] via-[#7bb661] to-[#b6e2b3]">
+      {/* Barra lateral fixa */}
+      <div className="w-[200px] min-h-screen bg-[#386e1e]/80 shadow-2xl z-50">
+        <BarraLateral />
       </div>
-      <div className="flex flex-col md:flex-row w-[70%]  mt-10">
-        <div className="md:w-[50%] shadow-lg shadow-[#0000005d] border rounded-md bg-white border-gray-400 pt-2 pb-4 px-4 md:mr-4">
-          <div className="text-start">
-            <h1 className="text-4xl font-bold text-gray-900">
-              Bem-vindo!
-            </h1>
-            <p className="text-gray-800 mt-2 ml-4">
-              Aqui, você tem acesso em tempo real às
-              informações essenciais sobre seus pacientes
-            </p>
-          </div>
-          <div className="text-start mt-8">
-            <p className="text-gray-800 mt-2 ml-4">
-              Numero de pacientes: 10
-            </p>
-            <p className="text-gray-800 mt-2 ml-4">
-              Ultima Atualização: 10 min
-            </p>
+      {/* Conteúdo principal */}
+      <div className="flex-1 flex flex-col items-center">
+        {/* Header com foto e nome */}
+        <div className="flex justify-center pt-10 w-full">
+          <div className="flex items-center pl-2 w-[70%] h-20 bg-white border border-[#E3E9DF] rounded-2xl shadow-lg">
+            <div className="w-20 h-20 overflow-hidden rounded-full shadow-md border-4 border-[#5C8354] bg-[#F6F8F3] -mt-8">
+              <img
+                src="/medico.png"
+                alt="Foto do Médico"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="pl-4 text-2xl font-bold text-[#38702A]">Dr.
+            {nomeMedico ? nomeMedico : "Médico"}
+            </div>
           </div>
         </div>
-        <div className="md:mt-0 mt-4  flex justify-center  shadow-lg shadow-[#0000005d] items-center md:w-[50%] border rounded-md bg-white border-gray-400 pt-2 pb-4 px-4">
-          <div className="w-[150px] rounded-full overflow-hidden mr-3">
-            <img src="/iconeNovoPaciente.png" alt="Foto do Médico" className="w-full h-full object-cover" />
+        {/* Cards principais */}
+        <div className="flex flex-col md:flex-row w-[70%] mt-10 gap-6">
+          {/* Card de informações */}
+          <div className="md:w-[50%] bg-white border border-[#E3E9DF] rounded-2xl shadow-lg pt-6 pb-6 px-6 md:mr-4 flex flex-col justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-[#38702A] mb-2">
+                Bem-vindo!
+              </h1>
+              <p className="text-[#38702A] mt-2 ml-2">
+                Aqui, você tem acesso em tempo real às informações essenciais sobre seus pacientes.
+              </p>
+            </div>
+            <div className="mt-8">
+              <p className="text-[#38702A] mt-2 ml-2 font-medium">
+                Número de pacientes: <span className="font-bold">10</span>
+              </p>
+              <p className="text-[#38702A] mt-2 ml-2 font-medium">
+                Última atualização: <span className="font-bold">10 min</span>
+              </p>
+            </div>
           </div>
-          <div className="">
-            <p className="text-2xl text-start font-bold text-gray-900">
-              Cadastrar novos
-              Pacientes
-            </p>
-            <button
-              onClick={() => {
-                navigate("/cadastroPaciente")
-              }}
-              className="bg-[#5C8354] hover:bg-[#456340] transition-all duration-100 text-white font-bold py-2 px-4 rounded mt-4 w-full"
-            >
-              Cadastro
-            </button>
+          {/* Card de cadastro de paciente */}
+          <div className="md:mt-0 mt-4 flex justify-center items-center md:w-[50%] bg-white border border-[#E3E9DF] rounded-2xl shadow-lg pt-6 pb-6 px-6">
+            <div className="w-[120px] h-[120px] rounded-full overflow-hidden mr-4 border-4 border-[#5C8354] shadow-md bg-[#F6F8F3] flex-shrink-0">
+              <img src="/iconeNovoPaciente.png" alt="Novo Paciente" className="w-full h-full object-cover" />
+            </div>
+            <div className="flex flex-col justify-center flex-1">
+              <p className="text-2xl font-bold text-[#38702A] mb-2">
+                Cadastrar novos Pacientes
+              </p>
+              <button
+                onClick={() => navigate("/cadastroPaciente")}
+                className="bg-gradient-to-r from-[#5C8354] to-[#38702A] hover:from-[#38702A] hover:to-[#5C8354] transition-all duration-100 text-white font-bold py-2 px-6 rounded-full mt-2 shadow"
+              >
+                Cadastro
+              </button>
+            </div>
           </div>
         </div>
       </div>
