@@ -1,11 +1,15 @@
-
 import { useNavigate } from "react-router-dom";
 import BarraLateral from "../../componentes/menuBar";
-
+import { useEffect, useState } from "react";
 
 function Medico() {
   const navigate = useNavigate();
+  const [nomeMedico, setNomeMedico] = useState<string>("");
 
+  useEffect(() => {
+    const nome = localStorage.getItem("medicoNome");
+    if (nome) setNomeMedico(nome);
+  }, []);
 
   return (
     <div className="bg-[url('/image.png')] bg-cover bg-center bg-no-repeat bg-fixed  from-[#5C8354] to-[#cbffc0]  h-screen w-screen items-center flex flex-col">
@@ -19,8 +23,8 @@ function Medico() {
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="pl-2 text-lg font-semibold">
-            DR. Paulo
+          <div className="pl-2 text-lg font-semibold">Dr.
+            {nomeMedico ? nomeMedico : "Médico"}
           </div>
         </div>
       </div>
