@@ -1,121 +1,110 @@
-
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import BarraLateral from "../../componentes/menuBar";
-import ItemListaPaciente from "../../componentes/intemListaPacientes";
-import { FaBell, FaCalendarAlt, FaChartBar, FaChevronDown, FaEdit, FaHeart, FaPlus, FaSearch, FaUser } from "react-icons/fa";
-
+import { FaBell, FaCalendarAlt, FaChartBar, FaChevronDown, FaEdit, FaHeart, FaUser, FaArrowLeft } from "react-icons/fa";
 
 function DadosPaciente() {
     const navigate = useNavigate();
 
-    const medico = { nome: "Dr. Paulo", fotoUrl: "/medico.png" };
-    const paciente = { nome: "Paciente 1" };
+    const paciente = { nome: "Paciente 1", fotoUrl: "/medico.png" };
     const data = "20/03/2025";
     const medicoes = [
-        { hora: "00:00", glicose: 100, insulina: 2, periodo: "CAF" },
-        { hora: "00:00", glicose: 100, insulina: 2, periodo: "CAF" },
-        { hora: "00:00", glicose: 100, insulina: 2, periodo: "CAF" },
-        { hora: "00:00", glicose: 100, insulina: 2, periodo: "CAF" },
+        { hora: "00:00", glicose: 100, insulina: 2, periodo: "Café" },
+        { hora: "06:00", glicose: 110, insulina: 3, periodo: "Almoço" },
+        { hora: "12:00", glicose: 95, insulina: 2, periodo: "Janta" },
+        { hora: "18:00", glicose: 105, insulina: 2, periodo: "Janta" },
     ];
 
     return (
-
-        <div className="bg-[url('/image.png')] bg-cover bg-center bg-no-repeat bg-fixed  from-[#5C8354] to-[#cbffc0]  h-screen w-screen items-center flex flex-col">
-            <BarraLateral />
-            <div className="flex  flex-col justify-center items-center pt-10 w-full h-screen">
-                <div className="flex w-[70%] justify-start ">
-
+        <div className="bg-gradient-to-br from-[#5C8354] via-[#cbffc0] to-[#e6ffe6] min-h-screen w-screen flex flex-col md:flex-row">
+            {/* Menu lateral */}
+            <div className="w-full md:w-[200px] min-h-[60px] md:min-h-screen bg-[#386e1e]/80 shadow-2xl z-50">
+                <BarraLateral />
+            </div>
+            {/* Conteúdo principal */}
+            <div className="flex-1 flex flex-col">
+                {/* Topo estilo banner */}
+                <div className="relative flex flex-col md:flex-row items-center bg-gradient-to-r from-[#5C8354] via-[#cbffc0] to-[#e6ffe6] h-auto md:h-48 shadow-lg px-4 md:px-12 py-6 md:py-0">
+                    <img
+                        src={paciente.fotoUrl}
+                        alt="Paciente"
+                        className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-[#5C8354] shadow-xl bg-white"
+                    />
+                    <div className="ml-0 md:ml-8 mt-4 md:mt-0 text-center md:text-left">
+                        <h1 className="text-2xl md:text-4xl font-bold text-white drop-shadow">{paciente.nome}</h1>
+                        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 mt-2">
+                            <span className="flex items-center gap-2 text-[#386e1e] bg-white/95 px-4 py-1 rounded-full font-semibold shadow">
+                                <FaCalendarAlt /> {data}
+                            </span>
+                            <span className="flex items-center gap-2 text-[#386e1e] bg-white/95 px-4 py-1 rounded-full font-semibold shadow">
+                                <FaUser /> Paciente
+                            </span>
+                        </div>
+                    </div>
+                    {/* Botão Voltar no lado direito */}
                     <button
                         onClick={() => navigate("/paciente")}
-                        className="  flex items-center gap-2 px-4  bg-[#ffffff] hover:bg-[#d4d4d4] text-[#386e1e] rounded transition font-semibold shadow"
-                    > Voltar
+                        className="absolute right-4 md:right-8 top-4 md:top-1/2 md:-translate-y-1/2 flex items-center gap-2 px-4 py-2 bg-white hover:bg-white/80 text-[#386e1e] rounded-full transition font-semibold shadow border border-[#5C8354] z-20"
+                    >
+                        <FaArrowLeft /> Voltar
                     </button>
                 </div>
-                <div className="flex w-[70%] ">
-                    <p className=" font-semibold text-white text-lg">
-                        Paciente 1
-                    </p>
-                </div>
-                <div className="px-8 py-6 w-[75%] min-h-[70%] border rounded-md bg-white border-gray-400">
-
-
-
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div className="flex items-center gap-2">
-                            <FaUser className="text-[#5C8354] text-xl" />
-                            <span className="font-semibold text-lg text-gray-800">{paciente.nome}</span>
-                        </div>
-                        <div className="flex gap-4 bg-[#f7f9fc] border border-[#5C8354] rounded-full px-4 py-2">
-                            <FaChartBar className="text-[#5C8354] text-xl cursor-pointer" />
-                            <FaHeart className="text-[#5C8354] text-xl cursor-pointer" />
-                            <FaBell className="text-[#5C8354] text-xl cursor-pointer" />
-                            <FaCalendarAlt className="text-[#5C8354] text-xl cursor-pointer" />
-                            <FaEdit className="text-[#5C8354] text-xl cursor-pointer" />
+                {/* Conteúdo em colunas */}
+                <div className="flex flex-col lg:flex-row flex-1 px-4 md:px-12 py-6 md:py-8 gap-6 md:gap-8">
+                    {/* Lista de medições */}
+                    <div className="flex-1 w-full">
+                        <h2 className="text-xl md:text-2xl font-bold text-[#ffffff] mb-4 flex items-center gap-2">
+                            <FaChartBar /> Medições Recentes
+                        </h2>
+                        <div className="flex flex-col gap-3 w-full max-w-full md:max-w-2xl">
+                            {medicoes.map((m, i) => (
+                                <div
+                                    key={i}
+                                    className="bg-white/90 rounded-xl shadow-lg border-l-4 border-[#5C8354] p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between hover:scale-[1.01] transition w-full"
+                                >
+                                    <div className="flex flex-col">
+                                        <span className="text-base font-bold text-[#386e1e]">{m.hora}</span>
+                                        <span className="text-xs bg-[#e6ffe6] text-[#386e1e] px-2 py-0.5 rounded-full font-semibold w-fit mt-1">{m.periodo}</span>
+                                    </div>
+                                    <div className="flex gap-6 mt-2 sm:mt-0">
+                                        <div className="flex flex-col items-center">
+                                            <span className="text-xs text-[#5C8354] font-semibold">Glicose</span>
+                                            <span className="text-sm font-bold text-white bg-[#5C8354] rounded-full px-2 py-0.5 shadow">{m.glicose} mg/dL</span>
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                            <span className="text-xs text-[#5C8354] font-semibold">Insulina</span>
+                                            <span className="text-sm font-bold text-white bg-[#5C8354] rounded-full px-2 py-0.5 shadow">{m.insulina} UN</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
-                    {/* Data e Filtro */}
-                    <div className="flex  md:items-center gap-6">
-                        <div className="flex items-center gap-2 text-[#5C8354] font-semibold">
-                            <FaCalendarAlt />
-                            <span>{data}</span>
+                    {/* Coluna lateral direita */}
+                    <div className="w-full lg:w-80 flex flex-col gap-6 items-start mt-8 lg:mt-12">
+                        {/* Ações rápidas */}
+                        <div className="bg-white/90 rounded-xl shadow-lg border border-[#5C8354] p-5 flex flex-col gap-4 w-full">
+                            <h3 className="text-lg font-bold text-[#386e1e] mb-2">Ações</h3>
+                            <div className="flex gap-4 justify-between flex-wrap">
+                                <FaChartBar className="text-[#5C8354] text-2xl cursor-pointer hover:scale-110 transition" title="Gráficos"/>
+                                <FaHeart className="text-[#5C8354] text-2xl cursor-pointer hover:scale-110 transition" title="Saúde"/>
+                                <FaBell className="text-[#5C8354] text-2xl cursor-pointer hover:scale-110 transition" title="Alertas"/>
+                                <FaCalendarAlt className="text-[#5C8354] text-2xl cursor-pointer hover:scale-110 transition" title="Calendário"/>
+                                <FaEdit className="text-[#5C8354] text-2xl cursor-pointer hover:scale-110 transition" title="Editar"/>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2 text-gray-700 font-medium">
-                            Medições Recentes <FaChevronDown className="text-[#5C8354]" />
+                        {/* Conquistas/Resumo */}
+                        <div className="bg-white/90 rounded-xl shadow-lg border border-[#5C8354] p-5 w-full">
+                            <h3 className="text-lg font-bold text-[#386e1e] mb-2">Resumo</h3>
+                            <ul className="text-[#386e1e] text-sm font-medium space-y-2">
+                                <li>Última medição: <span className="font-bold">{medicoes[medicoes.length-1].hora}</span></li>
+                                <li>Média glicose: <span className="font-bold">{(medicoes.reduce((a, b) => a + b.glicose, 0) / medicoes.length).toFixed(1)} mg/dL</span></li>
+                                <li>Média insulina: <span className="font-bold">{(medicoes.reduce((a, b) => a + b.insulina, 0) / medicoes.length).toFixed(1)} UN</span></li>
+                                <li>Períodos registrados: <span className="font-bold">{[...new Set(medicoes.map(m => m.periodo))].length}</span></li>
+                            </ul>
                         </div>
                     </div>
-                    {/* Tabela de medições */}
-                    <div className="overflow-x-auto mt-2 border border-[#36a128] p-4 rounded-lg">
-                        <table className="min-w-full text-left">
-                            <thead>
-                                <tr className="text-gray-600 text-sm">
-                                    <th className="py-2 pr-4">Hora</th>
-                                    <th className="py-2 pr-4">Glicose</th>
-                                    <th className="py-2 pr-4">Insulina</th>
-                                    <th className="py-2 pr-4">Período</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {medicoes.map((m, i) => (
-                                    <tr key={i} className="align-middle">
-                                        <td className="py-2 md:pr-2 text-gray-700">{m.hora}</td>
-                                        <td className="py-2 pr-2">
-                                            <div className="flex flex-col md:flex-row h-[80px] md:h-auto items-center gap-2 bg-[#d6f5d6] rounded-lg px-3 py-1 w-fit">
-                                                <div className="md:flex">
-
-                                                    {/* <img src="/iconeNovoPaciente.png" alt="Glicose" className="w-5 h-5" /> */}
-                                                    <span className="font-bold text-[#5C8354] text-xs">Glicose</span>
-                                                </div>
-                                                <span className="bg-[#5C8354] text-white rounded-full px-2 py-0.5 text-xs text-center font-semibold">{m.glicose} mg/dL</span>
-                                            </div>
-                                        </td>
-                                        <td className="py-2 md:pr-2">
-                                            <div className="flex flex-col md:flex-row h-[80px] md:h-auto items-center gap-2 bg-[#d6f5d6] rounded-lg px-3 py-1 w-fit">
-                                                <div className="md:flex">
-
-                                                    {/* <img src="/iconeNovoPaciente.png" alt="Insulina" className="w-5 h-5" /> */}
-                                                    <span className="font-bold text-[#5C8354] text-xs">Insulina</span>
-                                                </div>
-                                                <span className="bg-[#5C8354] text-white rounded-full px-2 py-0.5 text-center text-xs font-semibold">{m.insulina} UN</span>
-                                            </div>
-                                        </td>
-                                        <td className="py-2 md:pr-2">
-                                            <div className="flex flex-col items-center">
-                                                <FaCalendarAlt className="text-[#bdbdbd] text-xl" />
-                                                <span className="text-xs text-gray-500">{m.periodo}</span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-
-
-
-
                 </div>
             </div>
-
         </div>
     );
 }
