@@ -22,7 +22,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/dashbords" element={<Dashboards />} />
         <Route path="/medico" element={<Medico />} />
         <Route path="/paciente" element={<Paciente />} />
-        <Route path="/dadosPaciente" element={<DadosPaciente />} />
+        <Route path="/dadosPaciente/:id" element={<DadosPaciente />} />
         <Route path="/cadastroPaciente" element={<CadastroPaciente />} />
         <Route path="/prescricaoPaciente" element={<PrescricaoPaciente />} />
       </Routes>

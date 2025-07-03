@@ -8,6 +8,27 @@ export const api = axios.create({
   baseURL,
 });
 
+
+
+export interface RegistroGlicose {
+  dataHora: string;
+  hora: string;
+  glicose: number;
+  insulina: number;
+  periodo: string;
+}
+
+export const getRegistrosGlicosePorUsuario = async (id_usuario: number): Promise<RegistroGlicose[]> => {
+  const resp = await api.get<RegistroGlicose[]>(`/RegistroGlicose/usuario/${id_usuario}`);
+  return resp.data;
+};
+
+
+export const getPacientePorId = async (id: number): Promise<PacienteResumo> => {
+  const resp = await api.get<PacienteResumo>(`/Paciente/${id}`);
+  return resp.data;
+};
+
 // Dados de login
 export interface LoginData {
   email: string;
@@ -54,13 +75,13 @@ export const createMedico = async (
 // api.ts (no final do arquivo)
 
 export interface PacienteResumo {
-  id:                number;
-  nome_completo:     string;
-  email:             string;
-  celular?:          string;
-  plano_saude?:      string;
+  id: number;
+  email: string;
+  nome_completo: string;
+  cpf: string;
+  celular?: string;
+  plano_saude?: string;
   numero_prontuario?: string;
-  fotoUrl?:           string;
 }
 
 export const getPacientesPorMedico = async (
@@ -128,33 +149,29 @@ export const getRegistroGlicose = async () => {
   }
 };
 
-interface RegistroGlicoseData {
-    // Adapte os campos conforme o modelo de dados esperado pela API
-    usuarioId: number;
-    valor: number;
-    periodoId: number;
-    dataHora: string;
+ export interface RegistroGlicoseData {
+   id_usuario:       number;
+   nivel_glicose:    number;
+   data_hora:        string;
+   id_periodo:       number;
+  tipo_insulina:    number;
+  unidade_insulina: string;
 }
 
-interface RegistroGlicoseResponse {
-    id: number;
-    usuarioId: number;
-    valor: number;
-    periodoId: number;
-    dataHora: string;
-    // Adicione outros campos retornados pela API, se houver
+
+export interface RegistroGlicoseResponse {
+  id:      number;
+  message: string;
 }
 
 export const createRegistroGlicose = async (
-    data: RegistroGlicoseData
+  data: RegistroGlicoseData
 ): Promise<RegistroGlicoseResponse> => {
-    try {
-        const response = await api.post<RegistroGlicoseResponse>('/RegistrarGlicose', data);
-        return response.data;
-    } catch (error) {
-        console.error('Erro ao criar registro de glicose:', error);
-        throw error;
-    }
+  const resp = await api.post<RegistroGlicoseResponse>(
+    '/RegistrarGlicose',
+    data
+  );
+  return resp.data;
 };
 
 export interface DeleteRegistroGlicoseResponse {

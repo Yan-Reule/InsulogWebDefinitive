@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BarraLateral from "../../componentes/menuBar";
-import ItemListaPaciente from "../../componentes/intemListaPacientes";
 import { FaPlus, FaSearch, FaEdit, FaHeart, FaBell, FaChartBar } from "react-icons/fa";
 import { getPacientesPorMedico, type PacienteResumo } from "../../services/api";
 
@@ -20,7 +19,10 @@ function Paciente() {
     const medicoId = Number(stored);
 
     getPacientesPorMedico(medicoId)
-      .then(data => setPacientes(data))
+      .then(data => {
+        setPacientes(data);
+        console.log(data);
+      })
       .catch(err => {
         console.error(err);
         // opcional: toast de erro
@@ -86,7 +88,7 @@ function Paciente() {
                     {/* Avatar */}
                     <div className="flex-shrink-0 mr-5">
                       <img
-                        src={p.fotoUrl || "/paciente.png"}
+                        src={"/paciente.png"}
                         alt={p.nome_completo}
                         className="w-16 h-16 rounded-full object-cover border-2 border-[#5C8354] shadow-md group-hover:border-[#5C8354] transition"
                       />

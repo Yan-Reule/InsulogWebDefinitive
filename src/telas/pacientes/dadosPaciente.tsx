@@ -1,112 +1,326 @@
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import BarraLateral from "../../componentes/menuBar";
-import { FaBell, FaCalendarAlt, FaChartBar, FaChevronDown, FaEdit, FaHeart, FaUser, FaArrowLeft } from "react-icons/fa";
+import {
+    FaBell,
+    FaCalendarAlt,
+    FaChartBar,
+    FaEdit,
+    FaHeart,
+    FaPlus,
+    FaUser,
+    FaArrowLeft,
+} from "react-icons/fa";
+import {
+    getPacientePorId,
+    getRegistrosGlicosePorUsuario,
+    getPeriodo,
+    createRegistroGlicose,
+    type PacienteResumo,
+    type RegistroGlicose,
+} from "../../services/api";
 
-function DadosPaciente() {
+export default function DadosPaciente() {
     const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
+    const pacienteId = Number(id);
 
-    const paciente = { nome: "Paciente 1", fotoUrl: "/medico.png" };
-    const data = "20/03/2025";
-    const medicoes = [
-        { hora: "00:00", glicose: 100, insulina: 2, periodo: "Café" },
-        { hora: "06:00", glicose: 110, insulina: 3, periodo: "Almoço" },
-        { hora: "12:00", glicose: 95, insulina: 2, periodo: "Janta" },
-        { hora: "18:00", glicose: 105, insulina: 2, periodo: "Janta" },
-    ];
+    // estados da tela
+    const [paciente, setPaciente] = useState<PacienteResumo | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [medicoes, setMedicoes] = useState<RegistroGlicose[]>([]);
+    const [loadingMedicoes, setLoadingMedicoes] = useState(true);
+
+    // modal e campos
+    const [isModalOpen, setModalOpen] = useState(false);
+    const [dataHora, setDataHora] = useState("");
+    const [novaGlicose, setNovaGlicose] = useState("");
+    const [novaInsulina, setNovaInsulina] = useState("");
+    const [tipoInsulina, setTipoInsulina] = useState<number>(0);
+    const [novoPeriodo, setNovoPeriodo] = useState<number>();
+    const [periodos, setPeriodos] = useState<{ id_periodo: number; descricao: string }[]>([]);
+
+    // busca lista de períodos
+    useEffect(() => {
+        getPeriodo()
+            .then(r => setPeriodos(r))
+            .catch(() => setPeriodos([]));
+    }, []);
+
+    // busca paciente e medições
+    useEffect(() => {
+        if (!pacienteId) return;
+
+        getPacientePorId(pacienteId)
+            .then(setPaciente)
+            .catch(() => setPaciente(null))
+            .finally(() => setLoading(false));
+
+        setLoadingMedicoes(true);
+        getRegistrosGlicosePorUsuario(pacienteId)
+            .then(setMedicoes)
+            .catch(() => setMedicoes([]))
+            .finally(() => setLoadingMedicoes(false));
+    }, [pacienteId]);
+
+    // cria um novo registro
+    async function handleCreateRegistro(e: React.FormEvent) {
+        e.preventDefault();
+        if (
+            dataHora === "" ||
+            novaGlicose === "" ||
+            tipoInsulina === undefined || tipoInsulina === null ||
+            novoPeriodo == null
+        ) {
+            return;
+        }
+
+        try {
+            const registro = {
+                id_usuario: pacienteId,
+                nivel_glicose: Number(novaGlicose),
+                data_hora: dataHora,
+                id_periodo: novoPeriodo,
+                tipo_insulina: Number(tipoInsulina), // garantir número
+                unidade_insulina: novaInsulina === "" ? "0" : String(novaInsulina), // garantir string
+            };
+            console.log("Enviando registro:", registro);
+            await createRegistroGlicose(registro);
+
+
+            const updated = await getRegistrosGlicosePorUsuario(pacienteId);
+            setMedicoes(updated);
+            setModalOpen(false);
+            setDataHora("");
+            setNovaGlicose("");
+            setNovaInsulina("");
+            setTipoInsulina(0);
+            setNovoPeriodo(undefined);
+        } catch (err) {
+            console.error(err);
+            // toast de erro, se desejar
+        }
+    }
+
+    if (loading) return <div className="p-8">Carregando...</div>;
+    if (!paciente) return <div className="p-8">Paciente não encontrado.</div>;
+
+    const hoje = new Date().toLocaleDateString("pt-BR");
 
     return (
-        <div className="bg-gradient-to-br from-[#5C8354] via-[#cbffc0] to-[#e6ffe6] min-h-screen w-screen flex flex-col md:flex-row">
-            {/* Menu lateral */}
-            <div className="w-full md:w-[200px] min-h-[60px] md:min-h-screen bg-[#386e1e]/80 shadow-2xl z-50">
+        <div className="bg-gradient-to-br from-[#5C8354] via-[#cbffc0] to-[#e6ffe6] min-h-screen flex">
+            <div className="w-full md:w-[200px] bg-[#386e1e]/80 shadow-2xl">
                 <BarraLateral />
             </div>
-            {/* Conteúdo principal */}
             <div className="flex-1 flex flex-col">
-                {/* Topo estilo banner */}
-                <div className="relative flex flex-col md:flex-row items-center bg-gradient-to-r from-[#5C8354] via-[#cbffc0] to-[#e6ffe6] h-auto md:h-48 shadow-lg px-4 md:px-12 py-6 md:py-0">
+                {/* Banner */}
+                <div className="relative flex items-center bg-gradient-to-r from-[#5C8354] via-[#cbffc0] to-[#e6ffe6] h-48 px-8">
                     <img
-                        src={paciente.fotoUrl}
+                        src="/usuario.png"
                         alt="Paciente"
-                        className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-[#5C8354] shadow-xl bg-white"
+                        className="w-28 h-28 rounded-full border-4 border-white shadow-lg"
                     />
-                    <div className="ml-0 md:ml-8 mt-4 md:mt-0 text-center md:text-left">
-                        <h1 className="text-2xl md:text-4xl font-bold text-white drop-shadow">{paciente.nome}</h1>
-                        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 mt-2">
-                            <span className="flex items-center gap-2 text-[#386e1e] bg-white/95 px-4 py-1 rounded-full font-semibold shadow">
-                                <FaCalendarAlt /> {data}
+                    <div className="ml-6 text-white">
+                        <h1 className="text-3xl font-bold drop-shadow">{paciente.nome_completo}</h1>
+                        <div className="mt-2 flex gap-3">
+                            <span className="flex items-center gap-1 bg-white/90 text-[#386e1e] px-3 py-1 rounded-full">
+                                <FaCalendarAlt /> {hoje}
                             </span>
-                            <span className="flex items-center gap-2 text-[#386e1e] bg-white/95 px-4 py-1 rounded-full font-semibold shadow">
+                            <span className="flex items-center gap-1 bg-white/90 text-[#386e1e] px-3 py-1 rounded-full">
                                 <FaUser /> Paciente
                             </span>
                         </div>
                     </div>
-                    {/* Botão Voltar no lado direito */}
                     <button
                         onClick={() => navigate("/paciente")}
-                        className="absolute right-4 md:right-8 top-4 md:top-1/2 md:-translate-y-1/2 flex items-center gap-2 px-4 py-2 bg-white hover:bg-white/80 text-[#386e1e] rounded-full transition font-semibold shadow border border-[#5C8354] z-20"
+                        className="absolute right-8 top-1/2 transform -translate-y-1/2 bg-white px-4 py-2 rounded-full shadow flex items-center gap-2 text-[#386e1e]"
                     >
                         <FaArrowLeft /> Voltar
                     </button>
                 </div>
-                {/* Conteúdo em colunas */}
-                <div className="flex flex-col lg:flex-row flex-1 px-4 md:px-12 py-6 md:py-8 gap-6 md:gap-8">
-                    {/* Lista de medições */}
-                    <div className="flex-1 w-full">
-                        <h2 className="text-xl md:text-2xl font-bold text-[#ffffff] mb-4 flex items-center gap-2">
+                {/* Conteúdo */}
+                <div className="flex flex-col lg:flex-row flex-1 px-8 py-6 gap-8">
+                    {/* Medições */}
+                    <div className="flex-1">
+                        <h2 className="text-2xl text-white mb-4 flex items-center gap-2">
                             <FaChartBar /> Medições Recentes
                         </h2>
-                        <div className="flex flex-col gap-3 w-full max-w-full md:max-w-2xl">
-                            {medicoes.map((m, i) => (
-                                <div
-                                    key={i}
-                                    className="bg-white/90 rounded-xl shadow-lg border-l-4 border-[#5C8354] p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between hover:scale-[1.01] transition w-full"
-                                >
-                                    <div className="flex flex-col">
-                                        <span className="text-base font-bold text-[#386e1e]">{m.hora}</span>
-                                        <span className="text-xs bg-[#e6ffe6] text-[#386e1e] px-2 py-0.5 rounded-full font-semibold w-fit mt-1">{m.periodo}</span>
-                                    </div>
-                                    <div className="flex gap-6 mt-2 sm:mt-0">
-                                        <div className="flex flex-col items-center">
-                                            <span className="text-xs text-[#5C8354] font-semibold">Glicose</span>
-                                            <span className="text-sm font-bold text-white bg-[#5C8354] rounded-full px-2 py-0.5 shadow">{m.glicose} mg/dL</span>
+                        {loadingMedicoes ? (
+                            <p className="text-white">Carregando medições...</p>
+                        ) : medicoes.length === 0 ? (
+                            <p className="text-white">Nenhum registro de glicose encontrado.</p>
+                        ) : (
+                            <div className="space-y-3">
+                                {medicoes.map((m, i) => (
+                                    <div
+                                        key={i}
+                                        className="bg-white rounded-xl shadow p-4 flex justify-between items-center"
+                                    >
+                                        <div>
+                                            <p className="font-bold text-[#386e1e]">{m.hora}</p>
+                                            <p className="text-sm bg-[#e6ffe6] px-2 py-0.5 rounded-full inline-block mt-1">
+                                                {m.periodo}
+                                            </p>
                                         </div>
-                                        <div className="flex flex-col items-center">
-                                            <span className="text-xs text-[#5C8354] font-semibold">Insulina</span>
-                                            <span className="text-sm font-bold text-white bg-[#5C8354] rounded-full px-2 py-0.5 shadow">{m.insulina} UN</span>
+                                        <div className="flex gap-6">
+                                            <div className="text-center">
+                                                <p className="text-xs font-semibold text-[#5C8354]">Glicose</p>
+                                                <p className="bg-[#5C8354] text-white px-2 py-0.5 rounded-full">
+                                                    {m.glicose} mg/dL
+                                                </p>
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-xs font-semibold text-[#5C8354]">Insulina</p>
+                                                <p className="bg-[#5C8354] text-white px-2 py-0.5 rounded-full">
+                                                    {m.insulina} UN
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    {/* Coluna lateral direita */}
-                    <div className="w-full lg:w-80 flex flex-col gap-6 items-start mt-8 lg:mt-12">
-                        {/* Ações rápidas */}
-                        <div className="bg-white/90 rounded-xl shadow-lg border border-[#5C8354] p-5 flex flex-col gap-4 w-full">
-                            <h3 className="text-lg font-bold text-[#386e1e] mb-2">Ações</h3>
-                            <div className="flex gap-4 justify-between flex-wrap">
-                                <FaChartBar className="text-[#5C8354] text-2xl cursor-pointer hover:scale-110 transition" title="Gráficos"/>
-                                <FaHeart className="text-[#5C8354] text-2xl cursor-pointer hover:scale-110 transition" title="Saúde"/>
-                                <FaBell className="text-[#5C8354] text-2xl cursor-pointer hover:scale-110 transition" title="Alertas"/>
-                                <FaCalendarAlt className="text-[#5C8354] text-2xl cursor-pointer hover:scale-110 transition" title="Calendário"/>
-                                <FaEdit className="text-[#5C8354] text-2xl cursor-pointer hover:scale-110 transition" title="Editar"/>
+                                ))}
                             </div>
+                        )}
+                    </div>
+                    {/* Ações & Resumo */}
+                    <div className="w-full lg:w-80 space-y-6">
+                        <div className="bg-white rounded-xl shadow p-5 flex justify-between items-center">
+                            <h3 className="font-bold text-[#386e1e]">Ações</h3>
+                            <FaPlus
+                                className="text-[#5C8354] text-2xl cursor-pointer"
+                                title="Novo registro"
+                                onClick={() => setModalOpen(true)}
+                            />
                         </div>
-                        {/* Conquistas/Resumo */}
-                        <div className="bg-white/90 rounded-xl shadow-lg border border-[#5C8354] p-5 w-full">
-                            <h3 className="text-lg font-bold text-[#386e1e] mb-2">Resumo</h3>
-                            <ul className="text-[#386e1e] text-sm font-medium space-y-2">
-                                <li>Última medição: <span className="font-bold">{medicoes[medicoes.length-1].hora}</span></li>
-                                <li>Média glicose: <span className="font-bold">{(medicoes.reduce((a, b) => a + b.glicose, 0) / medicoes.length).toFixed(1)} mg/dL</span></li>
-                                <li>Média insulina: <span className="font-bold">{(medicoes.reduce((a, b) => a + b.insulina, 0) / medicoes.length).toFixed(1)} UN</span></li>
-                                <li>Períodos registrados: <span className="font-bold">{[...new Set(medicoes.map(m => m.periodo))].length}</span></li>
+                        <div className="bg-white rounded-xl shadow p-5">
+                            <h3 className="font-bold text-[#386e1e] mb-3">Resumo</h3>
+                            <ul className="text-[#386e1e] space-y-2">
+                                <li>
+                                    Média glicose:{" "}
+                                    <strong>
+                                        {(
+                                            medicoes.reduce((sum, m) => sum + m.glicose, 0) /
+                                            (medicoes.length || 1)
+                                        ).toFixed(1)}{" "}
+                                        mg/dL
+                                    </strong>
+                                </li>
+                                <li>
+                                    Média insulina:{" "}
+                                    <strong>
+                                        {(
+                                            medicoes.reduce((sum, m) => sum + m.insulina, 0) /
+                                            (medicoes.length || 1)
+                                        ).toFixed(1)}{" "}
+                                        UN
+                                    </strong>
+                                </li>
+                                <li>
+                                    Períodos registrados:{" "}
+                                    <strong>
+                                        {new Set(medicoes.map(m => m.periodo)).size}
+                                    </strong>
+                                </li>
                             </ul>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Modal de novo registro */}
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <form
+                        onSubmit={handleCreateRegistro}
+                        className="bg-white rounded-xl shadow-lg p-6 w-80 space-y-4"
+                    >
+                        <h3 className="text-lg font-bold text-[#386e1e]">Novo Registro</h3>
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium">Data e Hora</label>
+                            <input
+                                type="datetime-local"
+                                value={dataHora}
+                                onChange={e => setDataHora(e.target.value)}
+                                className="border rounded px-2 py-1"
+                                required
+                            />
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium">Glicose (mg/dL)</label>
+                            <input
+                                type="number"
+                                value={novaGlicose}
+                                onChange={e => setNovaGlicose(e.target.value)}
+                                className="border rounded px-2 py-1"
+                                required
+                            />
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium">Tipo de Insulina</label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="tipoInsulina"
+                                    value={1}
+                                    checked={tipoInsulina === 1}
+                                    onChange={() => setTipoInsulina(1)}
+                                />
+                                Rápida
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="tipoInsulina"
+                                    value={2}
+                                    checked={tipoInsulina === 2}
+                                    onChange={() => setTipoInsulina(2)}
+                                />
+                                Lenta
+                            </label>
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium">Unidade (UN)</label>
+                            <input
+                                type="number"
+                                value={novaInsulina}
+                                onChange={e => setNovaInsulina(e.target.value)}
+                                className="border rounded px-2 py-1"
+                                placeholder="Opcional"
+                            />
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium">Período</label>
+                            <select
+                                value={novoPeriodo ?? ""}
+                                onChange={e => setNovoPeriodo(Number(e.target.value))}
+                                className="border rounded px-2 py-1"
+                                required
+                            >
+                                <option value="">Selecione…</option>
+                                {periodos.map(p => (
+                                    <option key={p.id_periodo} value={p.id_periodo}>
+                                        {p.descricao}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="flex justify-end gap-2 mt-4">
+                            <button
+                                type="button"
+                                onClick={() => setModalOpen(false)}
+                                className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-3 py-1 rounded bg-[#5C8354] text-white hover:bg-[#4b6e44]"
+                            >
+                                Salvar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
         </div>
     );
 }
-
-export default DadosPaciente;
