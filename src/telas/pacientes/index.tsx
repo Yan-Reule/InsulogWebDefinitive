@@ -1,13 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BarraLateral from "../../componentes/menuBar";
-import { FaPlus, FaSearch, FaEdit, FaHeart, FaBell, FaChartBar } from "react-icons/fa";
-import { getPacientesPorMedico, type PacienteResumo } from "../../services/api";
+import { FaPlus, FaSearch, FaEdit, FaTrash, FaBell, FaChartBar } from "react-icons/fa";
+import { getPacientesPorMedico, deletePaciente, type PacienteResumo, editPaciente } from "../../services/api";
+import { toast } from "react-toastify";
+
+// Novo tipo para edição
+type PacienteEdit = PacienteResumo | null;
 
 function Paciente() {
   const navigate = useNavigate();
   const [pacientes, setPacientes] = useState<PacienteResumo[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Estado para modal de edição
+  const [pacienteEditando, setPacienteEditando] = useState<PacienteEdit>(null);
+  const [editNome, setEditNome] = useState("");
+  // Estados para cada campo editável
+  const [editEmail, setEditEmail] = useState("");
+  const [editCpf, setEditCpf] = useState("");
+  const [editCelular, setEditCelular] = useState("");
+  const [editPlano, setEditPlano] = useState("");
+  const [editProntuario, setEditProntuario] = useState("");
 
   useEffect(() => {
     const stored = localStorage.getItem("medicoId");
@@ -30,6 +44,72 @@ function Paciente() {
       .finally(() => setLoading(false));
   }, [navigate]);
 
+  // Função para deletar paciente
+  async function handleDeletePaciente(id: number) {
+    if (!window.confirm("Tem certeza que deseja deletar este paciente?")) return;
+    try {
+      await deletePaciente(id);
+      setPacientes(pacientes.filter(p => p.id !== id));
+      toast.success('Paciente excluído com sucesso!');
+    } catch (err) {
+      alert("Erro ao deletar paciente.");
+    }
+  }
+
+  // Abre o modal de edição
+  function handleEditPaciente(id: number) {
+    const paciente = pacientes.find(p => p.id === id);
+    if (paciente) {
+      setPacienteEditando(paciente);
+      setEditNome(paciente.nome_completo || "");
+      setEditEmail(paciente.email || "");
+      setEditCpf(paciente.cpf || "");
+      setEditCelular(paciente.celular || "");
+      setEditPlano(paciente.plano_saude || "");
+      setEditProntuario(paciente.numero_prontuario || "");
+    }
+  }
+
+  // Salva a edição (agora atualiza no banco)
+  async function handleSaveEdit() {
+    if (pacienteEditando) {
+      try {
+        await editPaciente(pacienteEditando.id, {
+          nome_completo: editNome,
+          email: editEmail,
+          cpf: editCpf,
+          celular: editCelular,
+          plano_saude: editPlano,
+          numero_prontuario: editProntuario,
+        });
+
+        setPacientes(pacientes.map(p =>
+          p.id === pacienteEditando.id
+            ? {
+                ...p,
+                nome_completo: editNome,
+                email: editEmail,
+                cpf: editCpf,
+                celular: editCelular,
+                plano_saude: editPlano,
+                numero_prontuario: editProntuario,
+              }
+            : p
+        ));
+        setPacienteEditando(null);
+        toast.success('Paciente editado com sucesso!');
+      } catch (err) {
+        console.error("Erro ao editar paciente:", err);
+        alert("Erro ao editar paciente.");
+      }
+    }
+  }
+
+  // Fecha o modal
+  function handleCloseEdit() {
+    setPacienteEditando(null);
+  }
+
   return (
     <div className="bg-gradient-to-br from-[#386e1e] via-[#7bb661] to-[#b6e2b3] min-h-screen w-screen flex">
       {/* Gradiente sutil no topo */}
@@ -40,6 +120,77 @@ function Paciente() {
       </div>
       {/* Conteúdo principal */}
       <div className="flex-1 flex flex-col items-center relative z-10">
+        {/* Modal de edição */}
+        {pacienteEditando && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-8 shadow-2xl min-w-[300px] relative">
+              <button
+                onClick={handleCloseEdit}
+                className="absolute top-2 right-3 text-gray-400 hover:text-red-500 text-2xl font-bold"
+                title="Fechar"
+              >
+                ×
+              </button>
+              <h2 className="text-xl font-bold mb-4 text-[#386e1e]">Editar Paciente</h2>
+              <label className="block mb-2 text-gray-700 font-semibold">Nome completo</label>
+              <input
+                type="text"
+                value={editNome}
+                onChange={e => setEditNome(e.target.value)}
+                className="w-full border rounded px-3 py-2 mb-4"
+              />
+              <label className="block mb-2 text-gray-700 font-semibold">Email</label>
+              <input
+                type="email"
+                value={editEmail}
+                onChange={e => setEditEmail(e.target.value)}
+                className="w-full border rounded px-3 py-2 mb-4"
+              />
+              <label className="block mb-2 text-gray-700 font-semibold">CPF</label>
+              <input
+                type="text"
+                value={editCpf}
+                onChange={e => setEditCpf(e.target.value)}
+                className="w-full border rounded px-3 py-2 mb-4"
+              />
+              <label className="block mb-2 text-gray-700 font-semibold">Celular</label>
+              <input
+                type="text"
+                value={editCelular}
+                onChange={e => setEditCelular(e.target.value)}
+                className="w-full border rounded px-3 py-2 mb-4"
+              />
+              <label className="block mb-2 text-gray-700 font-semibold">Plano de Saúde</label>
+              <input
+                type="text"
+                value={editPlano}
+                onChange={e => setEditPlano(e.target.value)}
+                className="w-full border rounded px-3 py-2 mb-4"
+              />
+              <label className="block mb-2 text-gray-700 font-semibold">Nº Prontuário</label>
+              <input
+                type="text"
+                value={editProntuario}
+                onChange={e => setEditProntuario(e.target.value)}
+                className="w-full border rounded px-3 py-2 mb-4"
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={handleCloseEdit}
+                  className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  className="px-4 py-2 rounded bg-[#5C8354] hover:bg-lime-500 text-white font-semibold"
+                >
+                  Salvar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="flex flex-col pt-10 w-full min-h-screen items-center">
           {/* Cabeçalho */}
           <div className="flex w-full max-w-3xl justify-between items-center mb-8 px-2">
@@ -88,7 +239,7 @@ function Paciente() {
                     {/* Avatar */}
                     <div className="flex-shrink-0 mr-5">
                       <img
-                        src={"/paciente.png"}
+                        src={"/pacientefoto.png"}
                         alt={p.nome_completo}
                         className="w-16 h-16 rounded-full object-cover border-2 border-[#5C8354] shadow-md group-hover:border-[#5C8354] transition"
                       />
@@ -102,18 +253,24 @@ function Paciente() {
                     {/* Ações */}
                     <div className="flex gap-2 ml-4">
                       <button
-                        onClick={e => e.stopPropagation()}
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleEditPaciente(p.id);
+                        }}
                         className="bg-[#5C8354] p-2 rounded-full text-white hover:bg-lime-400 hover:text-[#5C8354] transition text-lg shadow"
                         title="Editar"
                       >
                         <FaEdit />
                       </button>
                       <button
-                        onClick={e => e.stopPropagation()}
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleDeletePaciente(p.id);
+                        }}
                         className="bg-[#5C8354] p-2 rounded-full text-white hover:bg-lime-400 hover:text-[#5C8354] transition text-lg shadow"
-                        title="Favoritar"
+                        title="Deletar"
                       >
-                        <FaHeart />
+                        <FaTrash />
                       </button>
                       <button
                         onClick={e => e.stopPropagation()}

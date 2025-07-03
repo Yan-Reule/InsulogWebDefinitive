@@ -1,17 +1,38 @@
 import { useNavigate } from "react-router-dom";
 import BarraLateral from "../../componentes/menuBar";
 import { useEffect, useState } from "react";
+import { getPacientesPorMedico } from "../../services/api"; // ajuste o caminho se necessário
 
 function Medico() {
   const navigate = useNavigate();
   const [nomeMedico, setNomeMedico] = useState<string>("");
+  const [numPacientes, setNumPacientes] = useState<number>(0);
 
   useEffect(() => {
     const nome = localStorage.getItem("medicoNome");
     if (nome) setNomeMedico(nome);
+
+    const medicoId = localStorage.getItem("medicoId"); // ou de onde você salva o id do médico
+    if (!medicoId) return;
+
+    // Buscar número de pacientes
+    const fetchPacientes = async () => {
+      try {
+        const pacientes = await getPacientesPorMedico(Number(medicoId));
+        setNumPacientes(pacientes.length);
+      } catch (err) {
+        setNumPacientes(0);
+      }
+    };
+    fetchPacientes();
   }, []);
 
-   return (
+  function capitalizeFirstLetter(str: string) {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  return (
     <div className="flex min-h-screen bg-gradient-to-br from-[#386e1e] via-[#7bb661] to-[#b6e2b3]">
       {/* Barra lateral fixa */}
       <div className="w-[200px] min-h-screen bg-[#386e1e]/80 shadow-2xl z-50">
@@ -29,8 +50,8 @@ function Medico() {
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="pl-4 text-2xl font-bold text-[#38702A]">Dr.
-            {nomeMedico ? nomeMedico : "Médico"}
+            <div className="pl-4 text-2xl font-bold text-[#38702A]">
+              Dr. {nomeMedico ? capitalizeFirstLetter(nomeMedico) : "Médico"}
             </div>
           </div>
         </div>
@@ -48,10 +69,7 @@ function Medico() {
             </div>
             <div className="mt-8">
               <p className="text-[#38702A] mt-2 ml-2 font-medium">
-                Número de pacientes: <span className="font-bold">10</span>
-              </p>
-              <p className="text-[#38702A] mt-2 ml-2 font-medium">
-                Última atualização: <span className="font-bold">10 min</span>
+                Número de pacientes: <span className="font-bold">{numPacientes}</span>
               </p>
             </div>
           </div>
