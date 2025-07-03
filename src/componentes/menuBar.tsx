@@ -45,9 +45,17 @@ const BarraLateral: React.FC = () => {
         <ul className="p-4 space-y-2 font-bold">
           <li
             onClick={() => {
+              navigate("/medico");
+            }}
+            className="text-left p-2 hover:bg-[#5C8354] hover:text-white hover:cursor-pointer transition-all duration-150"
+          >
+            Home
+          </li>
+          <li
+            onClick={() => {
               navigate("/paciente");
             }}
-            className="text-left p-2 hover:bg-[#5C8354] hover:text-white hover:cursor-pointer transition-all duration-150]"
+            className="text-left p-2 hover:bg-[#5C8354] hover:text-white hover:cursor-pointer transition-all duration-150"
           >
             Meus Pacientes
           </li>
@@ -55,7 +63,7 @@ const BarraLateral: React.FC = () => {
             onClick={() => {
               navigate("/cadastroPaciente");
             }}
-            className="text-left p-2 hover:bg-[#5C8354] hover:text-white hover:cursor-pointer transition-all duration-150]"
+            className="text-left p-2 hover:bg-[#5C8354] hover:text-white hover:cursor-pointer transition-all duration-150"
           >
             Cadastro
           </li>
@@ -63,7 +71,7 @@ const BarraLateral: React.FC = () => {
             onClick={() => {
               navigate("/");
             }}
-            className="text-left p-2 hover:bg-[#5C8354] hover:text-white hover:cursor-pointer transition-all duration-150]"
+            className="text-left p-2 hover:bg-[#5C8354] hover:text-white hover:cursor-pointer transition-all duration-150"
           >
             Sair
           </li>

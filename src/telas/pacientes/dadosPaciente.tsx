@@ -10,15 +10,19 @@ import {
     FaPlus,
     FaUser,
     FaArrowLeft,
+    FaTrash,
 } from "react-icons/fa";
 import {
     getPacientePorId,
     getRegistrosGlicosePorUsuario,
     getPeriodo,
     createRegistroGlicose,
+    editRegistroGlicose,
+    deleteRegistroGlicose,
     type PacienteResumo,
     type RegistroGlicose,
 } from "../../services/api";
+import { toast } from "react-toastify";
 
 export default function DadosPaciente() {
     const navigate = useNavigate();
@@ -40,6 +44,9 @@ export default function DadosPaciente() {
     const [novoPeriodo, setNovoPeriodo] = useState<number>();
     const [periodos, setPeriodos] = useState<{ id_periodo: number; descricao: string }[]>([]);
 
+    // estados para edição
+    const [editando, setEditando] = useState<RegistroGlicose | null>(null);
+
     // busca lista de períodos
     useEffect(() => {
         getPeriodo()
@@ -58,7 +65,10 @@ export default function DadosPaciente() {
 
         setLoadingMedicoes(true);
         getRegistrosGlicosePorUsuario(pacienteId)
-            .then(setMedicoes)
+            .then(data => {
+                console.log("medicoes recebidas:", data);
+                setMedicoes(data);
+            })
             .catch(() => setMedicoes([]))
             .finally(() => setLoadingMedicoes(false));
     }, [pacienteId]);
@@ -102,6 +112,40 @@ export default function DadosPaciente() {
         }
     }
 
+    // Função para excluir registro
+    async function handleDeleteRegistro(id_registro: number) {
+        if (!window.confirm("Tem certeza que deseja excluir este registro?")) return;
+        try {
+            await deleteRegistroGlicose(id_registro);
+            setMedicoes(medicoes.filter(m => m.id_registro !== id_registro));
+        } catch (err) {
+            alert("Erro ao excluir registro.");
+        }
+    }
+
+    // Função para editar registro
+    async function handleEditRegistro(e: React.FormEvent) {
+        e.preventDefault();
+        if (!editando) return;
+        try {
+            await editRegistroGlicose(editando.id_registro, {
+                id_usuario: pacienteId,
+                nivel_glicose: Number(editando.glicose),
+                unidade_insulina: String(editando.insulina),
+                tipo_insulina: editando.tipo_insulina,
+                id_periodo: editando.id_periodo,
+                data_hora: editando.data_hora,
+            });
+            // Atualiza lista
+            const updated = await getRegistrosGlicosePorUsuario(pacienteId);
+            setMedicoes(updated);
+            setEditando(null);
+            toast.success('Registro editado com sucesso!');
+        } catch (err) {
+            alert("Erro ao editar registro.");
+        }
+    }
+
     if (loading) return <div className="p-8">Carregando...</div>;
     if (!paciente) return <div className="p-8">Paciente não encontrado.</div>;
 
@@ -116,7 +160,7 @@ export default function DadosPaciente() {
                 {/* Banner */}
                 <div className="relative flex items-center bg-gradient-to-r from-[#5C8354] via-[#cbffc0] to-[#e6ffe6] h-48 px-8">
                     <img
-                        src="/usuario.png"
+                        src="/pacientefoto.png"
                         alt="Paciente"
                         className="w-28 h-28 rounded-full border-4 border-white shadow-lg"
                     />
@@ -162,7 +206,7 @@ export default function DadosPaciente() {
                                                 {m.periodo}
                                             </p>
                                         </div>
-                                        <div className="flex gap-6">
+                                        <div className="flex gap-6 items-center">
                                             <div className="text-center">
                                                 <p className="text-xs font-semibold text-[#5C8354]">Glicose</p>
                                                 <p className="bg-[#5C8354] text-white px-2 py-0.5 rounded-full">
@@ -175,6 +219,20 @@ export default function DadosPaciente() {
                                                     {m.insulina} UN
                                                 </p>
                                             </div>
+                                            {/* Ícones de ação */}
+                                            <FaEdit
+                                                className="text-[#386e1e] text-xl cursor-pointer hover:text-lime-600 transition"
+                                                title="Editar registro"
+                                                onClick={() => {
+                                                    console.log("Clicou para editar:", m);
+                                                    setEditando(m);
+                                                }}
+                                            />
+                                            <FaTrash
+                                                className="text-[#386e1e] text-xl cursor-pointer hover:text-red-600 transition"
+                                                title="Excluir registro"
+                                                onClick={() => handleDeleteRegistro(m.id_registro)}
+                                            />
                                         </div>
                                     </div>
                                 ))}
@@ -185,11 +243,13 @@ export default function DadosPaciente() {
                     <div className="w-full lg:w-80 space-y-6">
                         <div className="bg-white rounded-xl shadow p-5 flex justify-between items-center">
                             <h3 className="font-bold text-[#386e1e]">Ações</h3>
-                            <FaPlus
-                                className="text-[#5C8354] text-2xl cursor-pointer"
-                                title="Novo registro"
-                                onClick={() => setModalOpen(true)}
-                            />
+                            <div className="flex gap-4 items-center">
+                                <FaPlus
+                                    className="text-[#5C8354] text-2xl cursor-pointer"
+                                    title="Novo registro"
+                                    onClick={() => setModalOpen(true)}
+                                />
+                            </div>
                         </div>
                         <div className="bg-white rounded-xl shadow p-5">
                             <h3 className="font-bold text-[#386e1e] mb-3">Resumo</h3>
@@ -198,26 +258,26 @@ export default function DadosPaciente() {
                                     Média glicose:{" "}
                                     <strong>
                                         {(
-                                            medicoes.reduce((sum, m) => sum + m.glicose, 0) /
+                                            medicoes.reduce((sum, m) => sum + Number(m.glicose), 0) /
                                             (medicoes.length || 1)
-                                        ).toFixed(1)}{" "}
-                                        mg/dL
+                                        ).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                                        {" "}mg/dL
                                     </strong>
                                 </li>
                                 <li>
                                     Média insulina:{" "}
                                     <strong>
                                         {(
-                                            medicoes.reduce((sum, m) => sum + m.insulina, 0) /
+                                            medicoes.reduce((sum, m) => sum + Number(m.insulina), 0) /
                                             (medicoes.length || 1)
                                         ).toFixed(1)}{" "}
                                         UN
                                     </strong>
                                 </li>
                                 <li>
-                                    Períodos registrados:{" "}
+                                    Número de registros:{" "}
                                     <strong>
-                                        {new Set(medicoes.map(m => m.periodo)).size}
+                                        {medicoes.length}
                                     </strong>
                                 </li>
                             </ul>
@@ -307,6 +367,101 @@ export default function DadosPaciente() {
                             <button
                                 type="button"
                                 onClick={() => setModalOpen(false)}
+                                className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-3 py-1 rounded bg-[#5C8354] text-white hover:bg-[#4b6e44]"
+                            >
+                                Salvar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            {/* Modal de edição */}
+            {editando && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <form
+                        onSubmit={handleEditRegistro}
+                        className="bg-white rounded-xl shadow-lg p-6 w-80 space-y-4"
+                    >
+                        <h3 className="text-lg font-bold text-[#386e1e]">Editar Registro</h3>
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium">Data e Hora</label>
+                            <input
+                                type="datetime-local"
+                                value={editando.data_hora}
+                                onChange={e => setEditando({ ...editando, data_hora: e.target.value })}
+                                className="border rounded px-2 py-1"
+                                required
+                            />
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium">Glicose (mg/dL)</label>
+                            <input
+                                type="number"
+                                value={editando.glicose}
+                                onChange={e => setEditando({ ...editando, glicose: Number(e.target.value) })}
+                                className="border rounded px-2 py-1"
+                                required
+                            />
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium">Tipo de Insulina</label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="tipoInsulinaEdit"
+                                    value={1}
+                                    checked={editando.tipo_insulina === 1}
+                                    onChange={() => setEditando({ ...editando, tipo_insulina: 1 })}
+                                />
+                                Rápida
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="tipoInsulinaEdit"
+                                    value={2}
+                                    checked={editando.tipo_insulina === 2}
+                                    onChange={() => setEditando({ ...editando, tipo_insulina: 2 })}
+                                />
+                                Lenta
+                            </label>
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium">Unidade (UN)</label>
+                            <input
+                                type="number"
+                                value={editando.insulina}
+                                onChange={e => setEditando({ ...editando, insulina: Number(e.target.value) })}
+                                className="border rounded px-2 py-1"
+                            />
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="text-sm font-medium">Período</label>
+                            <select
+                                value={editando.id_periodo}
+                                onChange={e => setEditando({ ...editando, id_periodo: Number(e.target.value) })}
+                                className="border rounded px-2 py-1"
+                                required
+                            >
+                                <option value="">Selecione…</option>
+                                {periodos.map(p => (
+                                    <option key={p.id_periodo} value={p.id_periodo}>
+                                        {p.descricao}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="flex justify-end gap-2 mt-4">
+                            <button
+                                type="button"
+                                onClick={() => setEditando(null)}
                                 className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300"
                             >
                                 Cancelar

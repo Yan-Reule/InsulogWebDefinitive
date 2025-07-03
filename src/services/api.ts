@@ -11,11 +11,15 @@ export const api = axios.create({
 
 
 export interface RegistroGlicose {
-  dataHora: string;
-  hora: string;
+  id_registro: number;
+  id_usuario: number;
   glicose: number;
   insulina: number;
+  tipo_insulina: number;
+  id_periodo: number;
   periodo: string;
+  data_hora: string;
+  hora: string;
 }
 
 export const getRegistrosGlicosePorUsuario = async (id_usuario: number): Promise<RegistroGlicose[]> => {
@@ -191,32 +195,45 @@ export const deleteRegistroGlicose = async (id: number): Promise<DeleteRegistroG
 };
 
 export interface EditRegistroGlicoseData {
-    usuarioId: number;
-    valor: number;
-    periodoId: number;
-    dataHora: string;
-}
-
-export interface EditRegistroGlicoseResponse {
-    id: number;
-    usuarioId: number;
-    valor: number;
-    periodoId: number;
-    dataHora: string;
-    // Adicione outros campos retornados pela API, se houver
+    id_usuario: number;
+    nivel_glicose: number;
+    data_hora: string;
+    id_periodo: number;
+    tipo_insulina: number;
+    unidade_insulina: string;
 }
 
 export const editRegistroGlicose = async (
     id: number,
     data: EditRegistroGlicoseData
-): Promise<EditRegistroGlicoseResponse> => {
+) => {
     try {
-        const response = await api.put<EditRegistroGlicoseResponse>(`/EditarRegistroGlicose/${id}`, data);
+        const response = await api.put(`/EditarRegistroGlicose/${id}`, data);
         return response.data;
     } catch (error) {
         console.error('Erro ao editar registro de glicose:', error);
         throw error;
     }
 };
+
+export async function deletePaciente(id: number) {
+  try {
+    const resp = await api.delete(`/Paciente/${id}`);
+    return resp.data;
+  } catch (error) {
+    console.error('Erro ao deletar paciente:', error);
+    throw error;
+  }
+}
+
+export async function editPaciente(id: number, data: any) {
+  try {
+    const resp = await api.put(`/Paciente/${id}`, data);
+    return resp.data;
+  } catch (error) {
+    console.error('Erro ao editar paciente:', error);
+    throw error;
+  }
+}
 
 export default api;

@@ -93,22 +93,7 @@ export default function CadastroPaciente() {
               Preencha os dados abaixo para cadastrar um novo paciente.
             </p>
             <div className="flex flex-col md:flex-row gap-4 sm:gap-8">
-              {/* Foto e ações */}
-              <div className="flex flex-col items-center md:w-1/3 w-full">
-                <div className="relative mb-3 sm:mb-4">
-                  <img
-                    src="medico.png"
-                    className="w-20 h-20 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-[#5C8354] shadow"
-                    alt="Foto do paciente"
-                  />
-                </div>
-                <button className="text-[#5C8354] hover:underline mb-1 text-xs sm:text-sm font-semibold">
-                  Importar foto
-                </button>
-                <button className="text-red-500 hover:underline text-xs sm:text-sm font-semibold">
-                  Deletar foto
-                </button>
-              </div>
+
               {/* Formulário */}
               <form onSubmit={handleSubmit} className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full">
             <input
