@@ -12,6 +12,7 @@ import CadastroPaciente from "./telas/cadastro/index.tsx";
 import PrescricaoPaciente from "./telas/prescricao/index.tsx";
 import CadMedico from "./telas/cadastrarMedico/index.tsx";
 import { ToastContainer } from "react-toastify";
+import Consultas from "./telas/consultas/index.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -25,6 +26,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/dadosPaciente/:id" element={<DadosPaciente />} />
         <Route path="/cadastroPaciente" element={<CadastroPaciente />} />
         <Route path="/prescricaoPaciente" element={<PrescricaoPaciente />} />
+        <Route path="/consulta" element={<Consultas />} />
       </Routes>
     </BrowserRouter>
     <ToastContainer
