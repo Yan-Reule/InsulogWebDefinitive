@@ -69,6 +69,14 @@ const BarraLateral: React.FC = () => {
           </li>
           <li
             onClick={() => {
+              navigate("/consulta");
+            }}
+            className="text-left p-2 hover:bg-[#5C8354] hover:text-white hover:cursor-pointer transition-all duration-150"
+          >
+            Consultas
+          </li>
+          <li
+            onClick={() => {
               navigate("/");
             }}
             className="text-left p-2 hover:bg-[#5C8354] hover:text-white hover:cursor-pointer transition-all duration-150"

@@ -10,6 +10,54 @@ export const api = axios.create({
 
 
 
+
+
+//==========================================================================================================
+//ROTAS PROEX 28/09/2025
+//==========================================================================================================
+
+
+export const getPacientesMaiorNumeroRegistros = async () => {
+  const resp = await api.get('/Consultas/pacientes/maiorNumeroRegistros');
+  return resp.data;
+};
+
+export const getMediaGlicosePorPaciente = async () => {
+  const resp = await api.get('/Consultas/pacientes/mediaGlicose');
+  return resp.data;
+};
+
+export const getPacientesMaiorNumeroInsulina = async () => {
+  const resp = await api.get('/Consultas/pacientes/maiorNumeroInsulina');
+  return resp.data;
+};
+
+export const getMaioresRegistrosGlicose = async () => {
+  const resp = await api.get('/Consultas/glicose/maioresRegistros');
+  return resp.data;
+};
+
+export const getMediaGlicosePorFaixaEtaria = async () => {
+  const resp = await api.get('/Consultas/glicose/mediaPorFaixaEtaria');
+  return resp.data;
+};
+
+export const getPacientesAcimaRecomendado = async () => {
+  const resp = await api.get('/Consultas/glicose/acimaRecomendado');
+  return resp.data;
+};
+
+export const getMedicoMaiorNumeroPacientes = async () => {
+  const resp = await api.get('/Consultas/medico/maiorNumeroPacientes');
+  return resp.data;
+};
+
+//==========================================================================================================
+//==========================================================================================================
+
+
+
+
 export interface RegistroGlicose {
   id_registro: number;
   id_usuario: number;
@@ -36,7 +84,7 @@ export const getPacientePorId = async (id: number): Promise<PacienteResumo> => {
 // Dados de login
 export interface LoginData {
   email: string;
-  senha:  string;
+  senha: string;
 }
 
 // Esperamos de volta pelo menos o ID do usuário
@@ -56,13 +104,13 @@ export interface MedicoData {
   nome: string;
   email: string;
   senha: string;
-  crm:   string;
+  crm: string;
   tipo_usuario: string; // 'medico' ou outro tipo se necessário
 }
 
 // E o que espera de volta:
 export interface MedicoResponse {
-  id:      number;
+  id: number;
   message: string;
 }
 
@@ -98,17 +146,17 @@ export const getPacientesPorMedico = async (
 
 export interface PacienteData {
   nome_completo: string;
-  email:         string;
-  cpf:           string;
-  celular?:      string;
-  senha:         string;
-  plano_saude?:  string;
+  email: string;
+  cpf: string;
+  celular?: string;
+  senha: string;
+  plano_saude?: string;
   numero_prontuario?: string;
-  id_medico:     number;
+  id_medico: number;
 }
 
 export interface PacienteResponse {
-  id:      number;
+  id: number;
   message: string;
 }
 
@@ -153,18 +201,18 @@ export const getRegistroGlicose = async () => {
   }
 };
 
- export interface RegistroGlicoseData {
-   id_usuario:       number;
-   nivel_glicose:    number;
-   data_hora:        string;
-   id_periodo:       number;
-  tipo_insulina:    number;
+export interface RegistroGlicoseData {
+  id_usuario: number;
+  nivel_glicose: number;
+  data_hora: string;
+  id_periodo: number;
+  tipo_insulina: number;
   unidade_insulina: string;
 }
 
 
 export interface RegistroGlicoseResponse {
-  id:      number;
+  id: number;
   message: string;
 }
 
@@ -179,41 +227,41 @@ export const createRegistroGlicose = async (
 };
 
 export interface DeleteRegistroGlicoseResponse {
-    // Defina os campos retornados pela API ao excluir, se houver
-    message?: string;
-    success?: boolean;
+  // Defina os campos retornados pela API ao excluir, se houver
+  message?: string;
+  success?: boolean;
 }
 
 export const deleteRegistroGlicose = async (id: number): Promise<DeleteRegistroGlicoseResponse> => {
-    try {
-        const response = await api.delete<DeleteRegistroGlicoseResponse>(`/ExcluirRegistroGlicose/${id}`);
-        return response.data;
-    } catch (error) {
-        console.error('Erro ao excluir registro de glicose:', error);
-        throw error;
-    }
+  try {
+    const response = await api.delete<DeleteRegistroGlicoseResponse>(`/ExcluirRegistroGlicose/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao excluir registro de glicose:', error);
+    throw error;
+  }
 };
 
 export interface EditRegistroGlicoseData {
-    id_usuario: number;
-    nivel_glicose: number;
-    data_hora: string;
-    id_periodo: number;
-    tipo_insulina: number;
-    unidade_insulina: string;
+  id_usuario: number;
+  nivel_glicose: number;
+  data_hora: string;
+  id_periodo: number;
+  tipo_insulina: number;
+  unidade_insulina: string;
 }
 
 export const editRegistroGlicose = async (
-    id: number,
-    data: EditRegistroGlicoseData
+  id: number,
+  data: EditRegistroGlicoseData
 ) => {
-    try {
-        const response = await api.put(`/EditarRegistroGlicose/${id}`, data);
-        return response.data;
-    } catch (error) {
-        console.error('Erro ao editar registro de glicose:', error);
-        throw error;
-    }
+  try {
+    const response = await api.put(`/EditarRegistroGlicose/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao editar registro de glicose:', error);
+    throw error;
+  }
 };
 
 export async function deletePaciente(id: number) {
