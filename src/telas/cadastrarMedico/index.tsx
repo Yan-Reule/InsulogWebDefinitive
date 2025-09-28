@@ -56,7 +56,9 @@ export default function CadMedico() {
                         />
                         <input
                             value={crm}
-                            onChange={e => setCrm(e.target.value)}
+                            onChange={e => {
+                                if (e.target.value.length <= 10) setCrm(e.target.value); // Limita a 10 caracteres
+                            }}
                             type="text"
                             placeholder="CRM"
                             className="w-full px-5 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-[#5C8354] text-base"

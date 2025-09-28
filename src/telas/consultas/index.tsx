@@ -29,6 +29,25 @@ function Consultas() {
     }
   }
 
+  function formatValue(value: any): string {
+    if (typeof value === "string" && value.includes("T")) {
+      // Formatar data e hora (ISO 8601)
+      const date = new Date(value);
+      return date.toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+    if (typeof value === "number") {
+      // Formatar números com duas casas decimais
+      return value.toFixed(2);
+    }
+    return String(value);
+  }
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-[#386e1e] via-[#7bb661] to-[#b6e2b3]">
       <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-b from-[#5C8354]/60 via-transparent to-transparent pointer-events-none z-0" />
@@ -85,14 +104,14 @@ function Consultas() {
               >
                 5 maiores registros de glicose no último mês
               </button>
-              <button
+              {/* <button
                 onClick={() =>
                   handleConsulta(getMediaGlicosePorFaixaEtaria, "Média de glicose por faixa etária")
                 }
                 className="w-full mb-2 px-4 py-2 bg-[#7bb661] text-white rounded hover:bg-[#386e1e] transition whitespace-normal max-w-xs"
               >
                 Média de glicose por faixa etária
-              </button>
+              </button> */}
               <button
                 onClick={() =>
                   handleConsulta(getPacientesAcimaRecomendado, "Pacientes com glicose acima do recomendado")
@@ -137,7 +156,7 @@ function Consultas() {
                       <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}>
                         {Object.values(row).map((value, colIndex) => (
                           <td key={colIndex} className="border border-gray-300 px-4 py-2">
-                            {String(value)}
+                            {formatValue(value)}
                           </td>
                         ))}
                       </tr>
